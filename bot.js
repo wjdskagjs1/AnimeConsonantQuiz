@@ -79,18 +79,15 @@ client.on('message', msg => {
     const {content, channel, author} = msg;
     if (content.startsWith('/acq')) {
 
-        let commands = content.split(' ');
-        commands = commands.slice(1, commands.length).map((element)=>{
-            element.replace(/\"/gi,'');
-        });
+        let commands = content.split('&');
 
-        if(commands[0] === '' || commands[0] === undefined || commands[0] === 'help'){
+        if(content.startsWith('/acqhelp')){
             channel.send(quote(readme));
         }
 
         // /acq start 10
         if(state.start){
-            if(state.start && content === quizList[state.currentQuizNum].answer){
+            if(content === quizList[state.currentQuizNum].answer){
                 channel.send(`${author}님, 정답입니다!`);
                 if(state.score[author] === undefined){
                     state.score[author] = 0;
@@ -108,26 +105,27 @@ client.on('message', msg => {
                     channel.send(quote(question()));
                 }
             }
-            if (commands[0] === 'quit') {
+            if (content.startsWith('/acqquit')) {
                 state.start = false;
                 state.times = 1;
                 state.score = {}
                 channel.send(`애니 초성 퀴즈를 강제 종료 합니다.`);
             }
-            if(commands[0] === 'hint'){
+            if(content.startsWith('/acqhint')){
                 channel.send(quote(callHint()));
             }
         }else{
-            if (commands[0] === 'start') {
+            if (content.startsWith('/acqstart')) {
                 state.start = true;
+                state.score = {}
                 state.times = Number(commands[1] ? commands[1] : 1);
                 channel.send(`애니 초성 퀴즈 ${state.times}문항을 시작합니다.`);
                 channel.send(quote(question()));
             }
         }
 
-        // /acq enroll "ㅅㅁㅇ ㅇㄴ ㅅㄱ" "신만이 아는 세계" "서버장이 제일 좋아하는 만화이자 애니"
-        if(commands[0] === 'enroll'){
+        // /acqenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&서버장이 제일 좋아하는 만화이자 애니
+        if(content.startsWith('/acqenroll')){
             const obj = {
                 quiz: commands[1],
                 answer: commands[2],

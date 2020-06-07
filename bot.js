@@ -125,7 +125,7 @@ client.on('message', msg => {
             }
         }
 
-        // /acqenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&서버장이 제일 좋아하는 만화이자 애니
+        // /acqenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&fact가 제일 좋아하는 만화이자 애니
         if(content.startsWith('/acqenroll')){
             const obj = {
                 quiz: commands[1],

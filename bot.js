@@ -90,7 +90,6 @@ client.on('message', msg => {
     const {content, channel, author} = msg;
     console.log(content);
     console.log(current.answer);
-    if (content.startsWith('/acq')) {
 
         let commands = content.split('&');
 
@@ -120,7 +119,7 @@ client.on('message', msg => {
             }
         }
 
-        if(game.start === true && content === current.answer){
+        if(game.start && content === current.answer){
             channel.send(`${author}님, 정답입니다!`);
             if(game.score[author] === undefined){
                 game.score[author] = 0;
@@ -164,9 +163,6 @@ client.on('message', msg => {
                 }
             }
         }
-
-        
-    }
 });
 
 // THIS  MUST  BE  THIS  WAY

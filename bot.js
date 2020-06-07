@@ -77,7 +77,7 @@ function quote(str){
 
 client.on('message', msg => {
     const {content, channel, author} = msg;
-    if (content.startsWith('/acq') && config.allowedChannel.includes(channel.name)) {
+    if (content.startsWith('/acq')) {
         let conmmands = content.split(' ');
         conmmands = conmmands.slice(1, conmmands.length).map((element)=>{
             element.replace(/\"/gi,'');

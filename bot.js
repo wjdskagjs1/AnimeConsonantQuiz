@@ -108,28 +108,6 @@ client.on('message', msg => {
             }
         }
 
-        // /acqenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&fact가 제일 좋아하는 만화이자 애니
-        if(content.startsWith('/acqenroll')){
-            const obj = {
-                quiz: commands[1],
-                answer: commands[2],
-                hint: commands[3],
-            }
-            if(checkAlreadyHas(obj)){ // 이미 있음
-                channel.send("이미 있습니다.");
-            }else if(commands[1].length !== commands[2].length){ // 글자수가 다름
-                channel.send("퀴즈와 정답의 글자수가 일치하지 않습니다");
-            }else{
-                channel.send("새 퀴즈가 추가 될 겁니다. (아마도)");
-                try{
-                    enroll(obj);
-                }catch(err){
-                    console.log(err);
-                    channel.send("에러가 발생했습니다.");
-                }
-            }
-        }
-
         if(state.start === true && content === quizList[state.currentQuizNum].answer){
             channel.send(`${author}님, 정답입니다!`);
             if(state.score[author] === undefined){
@@ -154,6 +132,30 @@ client.on('message', msg => {
                 channel.send(quote(question()));
             }
         }
+
+        // /acqenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&fact가 제일 좋아하는 만화이자 애니
+        if(content.startsWith('/acqenroll')){
+            const obj = {
+                quiz: commands[1],
+                answer: commands[2],
+                hint: commands[3],
+            }
+            if(checkAlreadyHas(obj)){ // 이미 있음
+                channel.send("이미 있습니다.");
+            }else if(commands[1].length !== commands[2].length){ // 글자수가 다름
+                channel.send("퀴즈와 정답의 글자수가 일치하지 않습니다");
+            }else{
+                channel.send("새 퀴즈가 추가 될 겁니다. (아마도)");
+                try{
+                    enroll(obj);
+                }catch(err){
+                    console.log(err);
+                    channel.send("에러가 발생했습니다.");
+                }
+            }
+        }
+
+        
     }
 });
 

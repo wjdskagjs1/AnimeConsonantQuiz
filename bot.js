@@ -79,12 +79,12 @@ client.on('message', msg => {
     const {content, channel, author} = msg;
     if (content.startsWith('/acq')) {
 
-        let conmmands = content.split(' ');
-        conmmands = conmmands.slice(1, conmmands.length).map((element)=>{
+        let commands = content.split(' ');
+        commands = commands.slice(1, commands.length).map((element)=>{
             element.replace(/\"/gi,'');
         });
 
-        if(commands[0] === '' ||commands[0] === undefined){
+        if(commands[0] === '' || commands[0] === undefined || commands[0] === 'help'){
             channel.send(quote(readme));
         }
 

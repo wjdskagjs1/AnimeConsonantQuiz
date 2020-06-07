@@ -131,6 +131,9 @@ client.on('message', msg => {
                 }
                 channel.send("=============");
                 channel.send('퀴즈를 종료합니다.');
+                game.start = false;
+                game.times = 1;
+                game.score = {}
             }else{
                 channel.send('다음문제입니다.');
                 current.times += 1;

@@ -118,7 +118,7 @@ client.on('message', msg => {
             if(game.score[author] === undefined){
                 game.score[author] = 0;
             }
-            game.score[nickname] += 1;
+            game.score[author] += 1;
 
             if(current.times >= game.times){
                 channel.send('최종 결과입니다.');

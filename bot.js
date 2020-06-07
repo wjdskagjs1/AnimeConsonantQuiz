@@ -30,7 +30,7 @@ function question(){
     const {quiz} = quizList[state.currentQuizNum];
     str += `문제 : ${quiz}\n`;
     str += `\n`;
-    str += `힌트를 보려면 /acq hint를 입력하세요!\n`;
+    str += `힌트를 보려면 /acqhint를 입력하세요!\n`;
     return str;
 }
 function result(){
@@ -48,7 +48,7 @@ function checkAlreadyHas(obj){
 
 function enroll(obj){
     quizList.push(obj);
-    fs.writeFile('quizList.json', JSON.stringify(quizList), 'utf8', function(err) {
+    fs.writeFile('./quizList.json', JSON.stringify(quizList), 'utf8', function(err) {
         console.log('비동기적 파일 쓰기 완료');
     });
 }
@@ -81,12 +81,13 @@ client.on('message', msg => {
 
         let commands = content.split('&');
 
-        if(content.startsWith('/acqhelp')){
+        if(content.startsWith('/acqhelp') || content === '/acq'){
             channel.send(quote(readme));
         }
 
         // /acq start 10
-        if(state.start){
+
+        if(state.start){ //게임 활성화
             if(content === quizList[state.currentQuizNum].answer){
                 channel.send(`${author}님, 정답입니다!`);
                 if(state.score[author] === undefined){
@@ -114,7 +115,7 @@ client.on('message', msg => {
             if(content.startsWith('/acqhint')){
                 channel.send(quote(callHint()));
             }
-        }else{
+        }else{ //게임 비활성화
             if (content.startsWith('/acqstart')) {
                 state.start = true;
                 state.score = {}
@@ -145,12 +146,6 @@ client.on('message', msg => {
                 }
             }
         }
-    }
-    
-
-
-    if (msg.content === 'ping') {
-       msg.reply('pong');
     }
 });
 

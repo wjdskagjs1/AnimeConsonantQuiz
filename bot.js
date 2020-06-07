@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
 const article = fs.readFileSync("README.md").toString();
-let quizList = require('quizList.json');
+let quizList = require('./quizList.json');
 
 client.on('ready', () => {
     console.log('I am ready!');
@@ -53,7 +53,7 @@ function enroll(obj){
     });
 }
 function update(obj){
-    const index
+    const index = 0;
     quizList.forEach((element, i)=>{
         if(element.quiz === obj.quiz){
             index === i;

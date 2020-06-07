@@ -45,9 +45,6 @@ function question(){
     str += `힌트를 보려면 /acqhint를 입력하세요!\n`;
     return str;
 }
-function result(){
-    return JSON.stringify(game.score, null, 4);
-}
 function checkAlreadyHas(obj){
     let alreadyHas = false;
     quizList.forEach((element)=>{
@@ -86,12 +83,6 @@ function callHint(){
 function quote(str){
     return "\`\`\`"+str+"\`\`\`";
 }
-function getNickName(author){
-    const guild = client.guilds.get('serverID');
-    const member = guild.member(author);
-    const nickname = member ? member.displayName : null;
-    return nickname;
-}
 
 client.on('message', msg => {
     const {content, channel, author} = msg;
@@ -124,15 +115,18 @@ client.on('message', msg => {
 
         if(game.start && content === current.answer){
             channel.send(`${author}님, 정답입니다!`);
-            const nickname = getNickName(author);
-            if(game.score[nickname] === undefined){
-                game.score[nickname] = 0;
+            if(game.score[author] === undefined){
+                game.score[author] = 0;
             }
             game.score[nickname] += 1;
 
             if(current.times >= game.times){
                 channel.send('최종 결과입니다.');
-                channel.send( "```"+result()+"```");
+                channel.send("=============");
+                for(let [key, value] of Object.entries(game.score)){
+                    channel.send(`${key} : ${value}점`);
+                }
+                channel.send("=============");
                 channel.send('퀴즈를 종료합니다.');
                 game = {
                     start: false,
@@ -145,7 +139,7 @@ client.on('message', msg => {
                 channel.send(quote(question()));
             }
         }
-        
+
         // /acqenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&fact가 제일 좋아하는 만화이자 애니
         if(content.startsWith('/acqenroll')){
             const obj = {

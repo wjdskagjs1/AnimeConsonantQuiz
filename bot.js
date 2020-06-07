@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
-const article = fs.readFileSync("README.md").toString();
+const readme = fs.readFileSync("README.md").toString();
 let quizList = require('./quizList.json');
 
 client.on('ready', () => {
@@ -78,10 +78,16 @@ function quote(str){
 client.on('message', msg => {
     const {content, channel, author} = msg;
     if (content.startsWith('/acq')) {
+
         let conmmands = content.split(' ');
         conmmands = conmmands.slice(1, conmmands.length).map((element)=>{
             element.replace(/\"/gi,'');
         });
+
+        if(commands[0] === '' ||commands[0] === undefined){
+            channel.send(quote(readme));
+        }
+
         // /acq start 10
         if(state.start){
             if(state.start && content === quizList[state.currentQuizNum].answer){
@@ -119,9 +125,6 @@ client.on('message', msg => {
                 channel.send(quote(question()));
             }
         }
-        if(commands[0] === 'help'){
-            msg.channel.send(quote(article));
-        }
 
         // /acq enroll "ㅅㅁㅇ ㅇㄴ ㅅㄱ" "신만이 아는 세계" "서버장이 제일 좋아하는 만화이자 애니"
         if(commands[0] === 'enroll'){
@@ -131,16 +134,16 @@ client.on('message', msg => {
                 hint: commands[3],
             }
             if(checkAlreadyHas(obj)){ // 이미 있음
-                msg.channel.send("이미 있습니다.");
+                channel.send("이미 있습니다.");
             }else if(commands[1].length !== commands[2].length){ // 글자수가 다름
-                msg.channel.send("퀴즈와 정답의 글자수가 일치하지 않습니다");
+                channel.send("퀴즈와 정답의 글자수가 일치하지 않습니다");
             }else{
-                msg.channel.send("새 퀴즈가 추가 될 겁니다. (아마도)");
+                channel.send("새 퀴즈가 추가 될 겁니다. (아마도)");
                 try{
                     enroll(obj);
                 }catch(err){
                     console.log(err);
-                    msg.channel.send("에러가 발생했습니다.");
+                    channel.send("에러가 발생했습니다.");
                 }
             }
         }

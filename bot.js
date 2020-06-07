@@ -88,9 +88,6 @@ client.on('message', msg => {
     const {content, channel, author} = msg;
 
         let commands = content.split('&');
-
-        console.log(JSON.stringify(game, null, 4));
-        console.log(JSON.stringify(current, null, 4));
     
         if(content.startsWith('/acqhelp') || content === '/acq'){
             channel.send(quote(readme));
@@ -125,11 +122,14 @@ client.on('message', msg => {
 
             if(current.times >= game.times){
                 channel.send('최종 결과입니다.');
+                let str = "=============\n";
+                
                 channel.send("=============");
                 for(let [key, value] of Object.entries(game.score)){
-                    channel.send(`${key} : ${value}점`);
+                    str += `${key} : ${value}점\n`;
                 }
-                channel.send("=============");
+                str = "=============\n";
+                channel.send(str);
                 channel.send('퀴즈를 종료합니다.');
                 game.start = false;
                 game.times = 1;

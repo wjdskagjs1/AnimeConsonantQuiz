@@ -6,7 +6,7 @@
 /acqhelp
 도움말을 출력합니다.
 
-/acqstart [횟수]
+/acqstart&[횟수]
 횟수만큼의 초성퀴즈를 시작합니다.
 
 /acqhint

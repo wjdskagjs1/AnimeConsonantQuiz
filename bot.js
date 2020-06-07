@@ -10,12 +10,17 @@ client.on('ready', () => {
 const config = {
     allowedChannel:['자유'],
 }
-const state = {
+let game = {
     start: false,
     times: 1,
     score: {},
-    currentQuizNum: 0,
-    currentTimes:0,
+}
+let current = {
+    times: 0,
+    index: 0,
+    quiz: "",
+    answer: "",
+    hint: "",
 }
 
 function getRandomInt(min, max) {
@@ -26,9 +31,15 @@ function getRandomInt(min, max) {
 
 function question(){
     let str = "";
-    state.currentQuizNum = getRandomInt(0, quizList.length);
-    const {quiz} = quizList[state.currentQuizNum];
-    str += `문제 : ${quiz}\n`;
+    current = {
+        times: current.times,
+        index: getRandomInt(0, quizList.length),
+        quiz: quizList[current.index].quiz,
+        answer: quizList[current.index].answer,
+        hitn: quizList[current.index].hint,
+
+    }
+    str += `문제 : ${current.quiz}\n`;
     str += `\n`;
     str += `힌트를 보려면 /acqhint를 입력하세요!\n`;
     return str;
@@ -66,7 +77,7 @@ function update(obj){
 }
 function callHint(){
     let str = "";
-    const {quiz, hint} = quizList[state.currentQuizNum];
+    const {quiz, hint} = quizList[current.index];
     str += `문제 : ${quiz}\n`;
     str += `힌트 : ${hint}\n`;
     return str;
@@ -78,6 +89,7 @@ function quote(str){
 client.on('message', msg => {
     const {content, channel, author} = msg;
     console.log(content);
+    console.log(current.answer);
     if (content.startsWith('/acq')) {
 
         let commands = content.split('&');
@@ -88,11 +100,11 @@ client.on('message', msg => {
 
         // /acq start 10
 
-        if(state.start){ //게임 활성화
+        if(game.start){ //게임 활성화
             if (content.startsWith('/acqquit')) {
-                state.start = false;
-                state.times = 1;
-                state.score = {}
+                game.start = false;
+                game.times = 1;
+                game.score = {}
                 channel.send(`애니 초성 퀴즈를 강제 종료 합니다.`);
             }
             if(content.startsWith('/acqhint')){
@@ -100,35 +112,33 @@ client.on('message', msg => {
             }
         }else{ //게임 비활성화
             if (content.startsWith('/acqstart')) {
-                state.start = true;
-                state.score = {}
-                state.times = Number(commands[1] ? commands[1] : 1);
-                channel.send(`애니 초성 퀴즈 ${state.times}문항을 시작합니다.`);
+                game.start = true;
+                game.score = {}
+                game.times = Number(commands[1] ? commands[1] : 1);
+                channel.send(`애니 초성 퀴즈 ${game.times}문항을 시작합니다.`);
                 channel.send(quote(question()));
             }
         }
 
-        if(state.start === true && content === quizList[state.currentQuizNum].answer){
+        if(game.start === true && content === current.answer){
             channel.send(`${author}님, 정답입니다!`);
-            if(state.score[author] === undefined){
-                state.score[author] = 0;
+            if(game.score[author] === undefined){
+                game.score[author] = 0;
             }
-            state.score[author] =  state.score[author] + 1;
+            game.score[author] =  game.score[author] + 1;
 
-            if(state.currentTimes > state.times){
+            if(current.times > game.times){
                 channel.send('최종 결과입니다.');
                 channel.send( "```"+result()+"```");
                 channel.send('퀴즈를 종료합니다.');
-                state = {
+                game = {
                     start: false,
                     times: 1,
                     score: {},
-                    currentQuizNum: 0,
-                    currentTimes:0,
                 }
             }else{
                 channel.send('다음문제입니다.');
-                state.times += 1;
+                current.times += 1;
                 channel.send(quote(question()));
             }
         }

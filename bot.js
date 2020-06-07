@@ -45,7 +45,7 @@ function question(){
     return str;
 }
 function result(){
-    return JSON.stringify(quizList, null, 4);
+    return JSON.stringify(game.score, null, 4);
 }
 function checkAlreadyHas(obj){
     let alreadyHas = false;
@@ -126,7 +126,7 @@ client.on('message', msg => {
             }
             game.score[author] =  game.score[author] + 1;
 
-            if(current.times > game.times){
+            if(current.times >= game.times){
                 channel.send('최종 결과입니다.');
                 channel.send( "```"+result()+"```");
                 channel.send('퀴즈를 종료합니다.');

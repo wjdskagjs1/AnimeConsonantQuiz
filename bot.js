@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const botconfig = require('./config.json');
 const fs = require('fs');
 const readme = fs.readFileSync("README.md").toString();
 let quizList = require('./quizList.json');
@@ -29,15 +30,30 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
 }
+function init(){
+    game = {
+        start: false,
+        times: 1,
+        score: {},
+    }
+    current = {
+        times: 0,
+        index: 0,
+        quiz: "",
+        answer: "",
+        hint: "",
+    }
+}
 
 function question(){
     let str = "";
+    const rnd = getRandomInt(0, quizList.length);
     current = {
         times: current.times + 1,
-        index: getRandomInt(0, quizList.length),
-        quiz: quizList[current.index].quiz,
-        answer: quizList[current.index].answer,
-        hitn: quizList[current.index].hint,
+        index: rnd,
+        quiz: quizList[rnd].quiz,
+        answer: quizList[rnd].answer,
+        hitn: quizList[rnd].hint,
 
     }
     str += `문제 : ${current.quiz}\n`;
@@ -105,8 +121,8 @@ client.on('message', msg => {
             }
         }else{ //게임 비활성화
             if (content.startsWith('/acqstart')) {
+                init();
                 game.start = true;
-                game.score = {}
                 game.times = Number(commands[1]) ? Number(commands[1]) : 1;
                 channel.send(`애니 초성 퀴즈 ${game.times}문항을 시작합니다.`);
                 channel.send(quote(question()));
@@ -114,6 +130,7 @@ client.on('message', msg => {
         }
 
         if(game.start && content === current.answer){
+            current.answer = "";
             channel.send(`${author}님, 정답입니다!`);
             if(game.score[author] === undefined){
                 game.score[author] = 0;
@@ -123,12 +140,10 @@ client.on('message', msg => {
             if(current.times >= game.times){
                 channel.send('최종 결과입니다.');
                 let str = "=============\n";
-                
-                channel.send("=============");
-                for(let [key, value] of Object.entries(game.score)){
-                    str += `${key} : ${value}점\n`;
+                for(const key in game.score){
+                    str += `${key} : ${game.score[key]}점\n`;
                 }
-                str = "=============\n";
+                str += "=============\n";
                 channel.send(str);
                 channel.send('퀴즈를 종료합니다.');
                 game.start = false;
@@ -136,7 +151,6 @@ client.on('message', msg => {
                 game.score = {}
             }else{
                 channel.send('다음문제입니다.');
-                current.times += 1;
                 channel.send(quote(question()));
             }
         }
@@ -156,6 +170,7 @@ client.on('message', msg => {
                 channel.send("새 퀴즈가 추가 될 겁니다. (아마도)");
                 try{
                     enroll(obj);
+                    quizList = require('./quizList.json');
                 }catch(err){
                     console.log(err);
                     channel.send("에러가 발생했습니다.");
@@ -166,4 +181,4 @@ client.on('message', msg => {
 });
 
 // THIS  MUST  BE  THIS  WAY
-client.login(process.env.BOT_TOKEN);//BOT_TOKEN is the Client Secret
+client.login(botconfig.token);//BOT_TOKEN is the Client Secret

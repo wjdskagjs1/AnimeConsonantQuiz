@@ -113,7 +113,7 @@ client.on('message', msg => {
             if (content.startsWith('/acqstart')) {
                 game.start = true;
                 game.score = {}
-                game.times = Number(commands[1]);
+                game.times = Number(commands[1]) ? Number(commands[1]) : 1;
                 channel.send(`애니 초성 퀴즈 ${game.times}문항을 시작합니다.`);
                 channel.send(quote(question()));
             }

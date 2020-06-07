@@ -32,7 +32,7 @@ function getRandomInt(min, max) {
 function question(){
     let str = "";
     current = {
-        times: current.times,
+        times: current.times + 1,
         index: getRandomInt(0, quizList.length),
         quiz: quizList[current.index].quiz,
         answer: quizList[current.index].answer,
@@ -113,7 +113,7 @@ client.on('message', msg => {
             if (content.startsWith('/acqstart')) {
                 game.start = true;
                 game.score = {}
-                game.times = Number(commands[1] ? commands[1] : 1);
+                game.times = Number(commands[1]);
                 channel.send(`애니 초성 퀴즈 ${game.times}문항을 시작합니다.`);
                 channel.send(quote(question()));
             }

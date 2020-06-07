@@ -77,6 +77,7 @@ function quote(str){
 
 client.on('message', msg => {
     const {content, channel, author} = msg;
+    console.log(content);
     if (content.startsWith('/acq')) {
 
         let commands = content.split('&');
@@ -88,24 +89,6 @@ client.on('message', msg => {
         // /acq start 10
 
         if(state.start){ //게임 활성화
-            if(content === quizList[state.currentQuizNum].answer){
-                channel.send(`${author}님, 정답입니다!`);
-                if(state.score[author] === undefined){
-                    state.score[author] = 0;
-                }
-                state.score[author] =  state.score[author] + 1;
-
-                if(state.currentTimes > state.times){
-                    channel.send('최종 결과입니다.');
-                    channel.send( "```"+result()+"```");
-                    channel.send('퀴즈를 종료합니다.');
-                    state.start = false;
-                }else{
-                    channel.send('다음문제입니다.');
-                    state.times += 1;
-                    channel.send(quote(question()));
-                }
-            }
             if (content.startsWith('/acqquit')) {
                 state.start = false;
                 state.times = 1;
@@ -144,6 +127,31 @@ client.on('message', msg => {
                     console.log(err);
                     channel.send("에러가 발생했습니다.");
                 }
+            }
+        }
+
+        if(state.start === true && content === quizList[state.currentQuizNum].answer){
+            channel.send(`${author}님, 정답입니다!`);
+            if(state.score[author] === undefined){
+                state.score[author] = 0;
+            }
+            state.score[author] =  state.score[author] + 1;
+
+            if(state.currentTimes > state.times){
+                channel.send('최종 결과입니다.');
+                channel.send( "```"+result()+"```");
+                channel.send('퀴즈를 종료합니다.');
+                state = {
+                    start: false,
+                    times: 1,
+                    score: {},
+                    currentQuizNum: 0,
+                    currentTimes:0,
+                }
+            }else{
+                channel.send('다음문제입니다.');
+                state.times += 1;
+                channel.send(quote(question()));
             }
         }
     }

@@ -102,77 +102,71 @@ client.on('message', msg => {
             channel.send(quote(readme));
         }
 
-        if(config.allowedChannel.includes(channel.name)){
-            if(game.start){ //게임 활성화
-                if (content.startsWith('/acqquit')) {
-                    game.start = false;
-                    game.times = 1;
-                    game.score = {}
-                    channel.send(`애니 초성 퀴즈를 강제 종료 합니다.`);
-                }
-                if(content.startsWith('/acqhint')){
-                    channel.send(quote(callHint()));
-                }
-            }else{ //게임 비활성화
-                if (content.startsWith('/acqstart')) {
-                    game.start = true;
-                    game.score = {}
-                    game.times = Number(commands[1]) ? Number(commands[1]) : 1;
-                    channel.send(`애니 초성 퀴즈 ${game.times}문항을 시작합니다.`);
-                    channel.send(quote(question()));
-                }
+        if(game.start){ //게임 활성화
+            if (content.startsWith('/acqquit')) {
+                game.start = false;
+                game.times = 1;
+                game.score = {}
+                channel.send(`애니 초성 퀴즈를 강제 종료 합니다.`);
             }
-    
-            if(game.start && content === current.answer){
-                channel.send(`${author}님, 정답입니다!`);
-                const nickname = getNickName(author);
-                if(game.score[nickname] === undefined){
-                    game.score[nickname] = 0;
-                }
-                game.score[nickname] += 1;
-    
-                if(current.times >= game.times){
-                    channel.send('최종 결과입니다.');
-                    channel.send( "```"+result()+"```");
-                    channel.send('퀴즈를 종료합니다.');
-                    game = {
-                        start: false,
-                        times: 1,
-                        score: {},
-                    }
-                }else{
-                    channel.send('다음문제입니다.');
-                    current.times += 1;
-                    channel.send(quote(question()));
-                }
+            if(content.startsWith('/acqhint')){
+                channel.send(quote(callHint()));
             }
-        }
-        if(config.enrollAllowedChannel.includes(channel.name)){
-            // /acqenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&fact가 제일 좋아하는 만화이자 애니
-            if(content.startsWith('/acqenroll')){
-                const obj = {
-                    quiz: commands[1],
-                    answer: commands[2],
-                    hint: commands[3],
-                }
-                if(checkAlreadyHas(obj)){ // 이미 있음
-                    channel.send("이미 있습니다.");
-                }else if(commands[1].length !== commands[2].length){ // 글자수가 다름
-                    channel.send("퀴즈와 정답의 글자수가 일치하지 않습니다");
-                }else{
-                    channel.send("새 퀴즈가 추가 될 겁니다. (아마도)");
-                    try{
-                        enroll(obj);
-                    }catch(err){
-                        console.log(err);
-                        channel.send("에러가 발생했습니다.");
-                    }
-                }
+        }else{ //게임 비활성화
+            if (content.startsWith('/acqstart')) {
+                game.start = true;
+                game.score = {}
+                game.times = Number(commands[1]) ? Number(commands[1]) : 1;
+                channel.send(`애니 초성 퀴즈 ${game.times}문항을 시작합니다.`);
+                channel.send(quote(question()));
             }
         }
 
+        if(game.start && content === current.answer){
+            channel.send(`${author}님, 정답입니다!`);
+            const nickname = getNickName(author);
+            if(game.score[nickname] === undefined){
+                game.score[nickname] = 0;
+            }
+            game.score[nickname] += 1;
+
+            if(current.times >= game.times){
+                channel.send('최종 결과입니다.');
+                channel.send( "```"+result()+"```");
+                channel.send('퀴즈를 종료합니다.');
+                game = {
+                    start: false,
+                    times: 1,
+                    score: {},
+                }
+            }else{
+                channel.send('다음문제입니다.');
+                current.times += 1;
+                channel.send(quote(question()));
+            }
+        }
         
-
+        // /acqenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&fact가 제일 좋아하는 만화이자 애니
+        if(content.startsWith('/acqenroll')){
+            const obj = {
+                quiz: commands[1],
+                answer: commands[2],
+                hint: commands[3],
+            }
+            if(checkAlreadyHas(obj)){ // 이미 있음
+                channel.send("이미 있습니다.");
+            }else if(commands[1].length !== commands[2].length){ // 글자수가 다름
+                channel.send("퀴즈와 정답의 글자수가 일치하지 않습니다");
+            }else{
+                channel.send("새 퀴즈가 추가 될 겁니다. (아마도)");
+                try{
+                    enroll(obj);
+                }catch(err){
+                    console.log(err);
+                    channel.send("에러가 발생했습니다.");
+                }
+            }
+        }
         
 });
 

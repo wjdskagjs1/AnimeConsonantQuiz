@@ -1,16 +1,40 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const botconfig = require('./config.json');
+const mysql      = require('sync-mysql');
+const mysql_token = require('./mysql-token.json');
+const connection = new mysql(mysql_token);
+
 const fs = require('fs');
 const readme = fs.readFileSync("README.md").toString();
-let quizList = require('./quizList.json');
+//let quizlist = require('./quizlist.json');
+
+function getQuiz(num){
+    let result = connection.query(`SELECT num, quiz, answer, hint FROM acq.quizlist where num = ${num}`);
+    return result[0];
+}
+function alreadyHasQuiz(answer){
+    let result = connection.query(`SELECT num, quiz, answer, hint FROM acq.quizlist where answer = '${answer}'`);
+    return result;
+}
+
+function setQuiz({quiz, answer, hint}){
+    connection.query(`INSERT INTO quizlist (quiz, answer, hint) VALUES ('${quiz}', '${answer}', '${hint}')`);
+}
+
+function getQuizListLength(){
+    let result = connection.query(`SELECT COUNT(*) as cnt FROM acq.quizlist`);
+    return result[0].cnt;
+}
+
+let quizlistLength = getQuizListLength();
 
 client.on('ready', () => {
     console.log('I am ready!');
 });
 const config = {
-    allowedChannel:['자유', '투기장'],
-    enrollAllowedChannel: ['봇'],
+    allowedChannel:['자유', '콜로세움'],
+    enrollAllowedChannel: ['봇-명령어'],
 }
 let game = {
     start: false,
@@ -47,39 +71,37 @@ function init(){
 
 function question(){
     let str = "";
-    const rnd = getRandomInt(0, quizList.length);
+    const rnd = getRandomInt(1, quizlistLength+1);
+    const result = getQuiz(rnd);
+    console.log(result);
     current = {
         times: current.times + 1,
         index: rnd,
-        quiz: quizList[rnd].quiz,
-        answer: quizList[rnd].answer,
-        hitn: quizList[rnd].hint,
+        quiz: result.quiz,
+        answer: result.answer,
+        hint: result.hint,
 
     }
     str += `문제 : ${current.quiz}\n`;
     str += `\n`;
-    str += `힌트를 보려면 /acqhint를 입력하세요!\n`;
+    str += `힌트를 보려면 /ahint를 입력하세요!\n`;
     return str;
 }
 function checkAlreadyHas(obj){
-    let alreadyHas = false;
-    quizList.forEach((element)=>{
-        if(element.answer === obj.answer){
-            alreadyHas = true;
-        }
-    })
-    return alreadyHas;
+    const result = alreadyHasQuiz(obj.answer);
+    if(result.length > 0){
+        return true;
+    }
+        return false;
 }
 
 function enroll(obj){
-    quizList.push(obj);
-    fs.writeFile('./quizList.json', JSON.stringify(quizList), 'utf8', function(err) {
-        console.log('비동기적 파일 쓰기 완료');
-    });
+    setQuiz(obj);
+    quizlistLength = getQuizListLength();
 }
 function update(obj){
     const index = 0;
-    quizList.forEach((element, i)=>{
+    quizlist.forEach((element, i)=>{
         if(element.quiz === obj.quiz){
             index === i;
         }
@@ -87,11 +109,11 @@ function update(obj){
             index === i;
         }
     })
-    quizList[index] = obj;
+    quizlist[index] = obj;
 }
 function callHint(){
     let str = "";
-    const {quiz, hint} = quizList[current.index];
+    const {quiz, hint} = getQuiz(current.index);
     str += `문제 : ${quiz}\n`;
     str += `힌트 : ${hint}\n`;
     return str;
@@ -105,22 +127,22 @@ client.on('message', msg => {
 
         let commands = content.split('&');
     
-        if(content.startsWith('/acqhelp') || content === '/acq'){
+        if(content.startsWith('/ahelp') || content === '/acq'){
             channel.send(quote(readme));
         }
 
         if(game.start){ //게임 활성화
-            if (content.startsWith('/acqquit')) {
+            if (content.startsWith('/aquit')) {
                 game.start = false;
                 game.times = 1;
                 game.score = {}
                 channel.send(`애니 초성 퀴즈를 강제 종료 합니다.`);
             }
-            if(content.startsWith('/acqhint')){
+            if(content.startsWith('/ahint')){
                 channel.send(quote(callHint()));
             }
         }else{ //게임 비활성화
-            if (content.startsWith('/acqstart')) {
+            if (content.startsWith('/astart')) {
                 init();
                 game.start = true;
                 game.times = Number(commands[1]) ? Number(commands[1]) : 1;
@@ -155,8 +177,8 @@ client.on('message', msg => {
             }
         }
 
-        // /acqenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&fact가 제일 좋아하는 만화이자 애니
-        if(content.startsWith('/acqenroll')){
+        // /aenroll&ㅅㅁㅇ ㅇㄴ ㅅㄱ&신만이 아는 세계&fact가 제일 좋아하는 만화이자 애니
+        if(content.startsWith('/aenroll')){
             const obj = {
                 quiz: commands[1],
                 answer: commands[2],
@@ -170,7 +192,6 @@ client.on('message', msg => {
                 channel.send("새 퀴즈가 추가 될 겁니다. (아마도)");
                 try{
                     enroll(obj);
-                    quizList = require('./quizList.json');
                 }catch(err){
                     console.log(err);
                     channel.send("에러가 발생했습니다.");
